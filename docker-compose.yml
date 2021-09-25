@@ -8,7 +8,8 @@ services:
     volumes:
       - "./scripts:/usr/app:ro"
       - "./database:/usr/database:rw"
-    environment: 
+    environment:
+      START_LINK: "https://www.lemonde.fr"
       CRAWLER_EMAIL: ${CRAWLER_EMAIL}
       CRAWLER_PASSWORD: ${CRAWLER_EMAIL}
       RETRIEVE_RELATED_ARTICLE_LINKS: "false"

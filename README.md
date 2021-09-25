@@ -29,6 +29,15 @@ This project uses [Playwright](https://github.com/microsoft/playwright).
 
 :warning: **DISCLAIMER : This project is for educational purpose only ! Do NOT use it for any other intent.** It was developed as a fun side-project to train my scraping skills.
 
+## Parameters
+
+| Name                           | Type | Description                                                                 |
+| ------------------------------ | ---- | --------------------------------------------------------------------------- |
+| CRAWLER_EMAIL                  | str  | Your LeMonde email address                                                  |
+| CRAWLER_PASSWORD               | str  | Your LeMonde email password                                                 |
+| START_LINK                     | str  | After login, start scraping articles from this page                         |
+| RETRIEVE_RELATED_ARTICLE_LINKS | bool | Crawl links in currently scraped article pointing to other similar articles |
+| RETRIEVE_EACH_ARTICLE_LINKS    | bool | Crawl all article links present in the currently scraped article            |
 ## Usage (Docker)
 
 1. Copy and fill your credentials in `.env` :

@@ -9,6 +9,7 @@ import time
 import traceback
 from typing import List, Union
 
+import tqdm
 import lxml.html
 import lxml.html.clean
 import playwright
@@ -163,7 +164,6 @@ def get_article_links_from_element(element: Union[Page, ElementHandle]) -> List[
 # ===================
 
 not_working_articles = []
-start_time = time.time()
 with sync_playwright() as p:
     is_docker = True if os.environ.get("IS_DOCKER", False) == "true" else False
     browser = p.chromium.launch(headless=True if is_docker else False)
@@ -178,7 +178,7 @@ with sync_playwright() as p:
         with open(COOKIES_FILE, "rb") as cookies_fs:
             cookies = pickle.loads(cookies_fs.read())
         context.add_cookies(cookies)
-        page.goto("https://www.lemonde.fr/")
+        page.goto(os.environ.get("START_LINK", "https://www.lemonde.fr/"))
 
         try:
             page.wait_for_load_state()
@@ -218,70 +218,91 @@ with sync_playwright() as p:
         cookies = context.cookies()
         with open(COOKIES_FILE, "wb+") as cookies_fs:
             cookies_fs.write(pickle.dumps(cookies))
-        page.goto("https://www.lemonde.fr/")
+        page.goto(os.environ.get("START_LINK", "https://www.lemonde.fr/"))
 
-    nb_crawled_news = 0
     page.wait_for_load_state()
     article_hrefs = get_article_links_from_element(page)
-    while article_hrefs:
-        article_href = article_hrefs.pop()
-        print(
-            f"Crawling next news... ({nb_crawled_news} crawled / {len(article_hrefs)} left / running for {round(time.time() - start_time)} seconds)"
-        )
+    nb_crawled_news = 0
+    nb_total_articles = len(article_hrefs)
 
-        if was_article_crawled(article_href):
-            print(f"Article already in database : {article_href}")
-            continue
+    with tqdm.tqdm(
+        total=nb_total_articles, position=0, leave=True, unit="article"
+    ) as pbar:
+        while article_hrefs:
+            pbar.update(1)
+            article_href = article_hrefs.pop()
+            
+            if was_article_crawled(article_href):
+                print(f"Article already in database : {article_href}")
+                pbar.update(0)
+                continue
 
-        page.goto(article_href)
-        random_activity(page, PAGE_HEIGHT, PAGE_WIDTH)
-        time.sleep(4)
-        random_activity(page, PAGE_HEIGHT, PAGE_WIDTH)
-
-        try:
-            article_content_html = ""
-            article_contents = page.query_selector_all(".article__paragraph")
-            for article_content in article_contents:
-                article_content_html += "\n\n" + article_content.inner_html()
-
-            try:
-                article_image = page.query_selector(
-                    "section > section.article__wrapper.article__wrapper--premium > article > figure > img"
-                )
-                article_image_bytes = article_image.screenshot()
-            except Exception as e:
-                print("No image found for this article")
-                article_image_bytes = None
-
-            article_title_html = get_html_from_selector(page, "h1.article__title")
-            article_description_html = get_html_from_selector(page, ".article__desc")
-            article_date_html = get_html_from_selector(page, ".meta__date")
-            article_author_html = get_html_from_one_of_selectors(
-                page,
-                [
-                    "#js-authors-list",
-                    ".article__author-link",
-                    ".article__author-description",
-                    ".meta__author",
-                ],
-            )
-
-            add_article(
-                url=article_href,
-                title=cleanhtml(article_title_html),
-                description=cleanhtml(article_description_html),
-                article=cleanhtml(article_content_html),
-                author=cleanhtml(article_author_html),
-                illustration=article_image_bytes,
-                date=cleanhtml(article_date_html),
-            )
-            nb_crawled_news += 1
+            page.goto(article_href)
+            random_activity(page, PAGE_HEIGHT, PAGE_WIDTH)
+            time.sleep(4)
+            random_activity(page, PAGE_HEIGHT, PAGE_WIDTH)
 
             try:
-                if RETRIEVE_RELATED_ARTICLE_LINKS:
-                    new_article_links = get_article_links_from_element(
-                        page.query_selector(".article__wrapper")
+                article_content_html = ""
+                article_contents = page.query_selector_all(".article__paragraph")
+                for article_content in article_contents:
+                    article_content_html += "\n\n" + article_content.inner_html()
+
+                try:
+                    article_image = page.query_selector(
+                        "section > section.article__wrapper.article__wrapper--premium > article > figure > img"
                     )
+                    article_image_bytes = article_image.screenshot()
+                except Exception as e:
+                    print("No image found for this article")
+                    article_image_bytes = None
+
+                article_title_html = get_html_from_selector(page, "h1.article__title")
+                article_description_html = get_html_from_selector(
+                    page, ".article__desc"
+                )
+                article_date_html = get_html_from_selector(page, ".meta__date")
+                article_author_html = get_html_from_one_of_selectors(
+                    page,
+                    [
+                        "#js-authors-list",
+                        ".article__author-link",
+                        ".article__author-description",
+                        ".meta__author",
+                    ],
+                )
+
+                add_article(
+                    url=article_href,
+                    title=cleanhtml(article_title_html),
+                    description=cleanhtml(article_description_html),
+                    article=cleanhtml(article_content_html),
+                    author=cleanhtml(article_author_html),
+                    illustration=article_image_bytes,
+                    date=cleanhtml(article_date_html),
+                )
+                nb_crawled_news += 1
+
+                try:
+                    if RETRIEVE_RELATED_ARTICLE_LINKS:
+                        new_article_links = get_article_links_from_element(
+                            page.query_selector(".article__wrapper")
+                        )
+                        for new_article_link in new_article_links:
+                            if (
+                                was_article_crawled(new_article_link) is False
+                                and new_article_link not in not_working_articles
+                                and new_article_link not in article_hrefs
+                            ):
+                                article_hrefs.append(new_article_link)
+                                nb_total_articles += 1
+                        pbar.total = nb_total_articles
+                        pbar.refresh()
+                except AttributeError as e:
+                    print("Could not retrieve more links for this article")
+
+                if RETRIEVE_EACH_ARTICLE_LINKS:
+                    new_article_links = get_article_links_from_element(page)
                     for new_article_link in new_article_links:
                         if (
                             was_article_crawled(new_article_link) is False
@@ -289,26 +310,15 @@ with sync_playwright() as p:
                             and new_article_link not in article_hrefs
                         ):
                             article_hrefs.append(new_article_link)
-            except AttributeError as e:
-                print("Could not retrieve more links for this article")
+                            nb_total_articles += 1
+                    pbar.total = nb_total_articles
+                    pbar.refresh()
+            except Exception as e:
+                not_working_articles.append(article_href)
+                print(traceback.format_exc())
+                print(e)
 
-            if RETRIEVE_EACH_ARTICLE_LINKS:
-                new_article_links = get_article_links_from_element(page)
-                for new_article_link in new_article_links:
-                    if (
-                        was_article_crawled(new_article_link) is False
-                        and new_article_link not in not_working_articles
-                        and new_article_link not in article_hrefs
-                    ):
-                        article_hrefs.append(new_article_link)
-        except Exception as e:
-            not_working_articles.append(article_href)
-            print(traceback.format_exc())
-            print(e)
-
-    print(
-        f"Crawled {nb_crawled_news} articles in total in {round(time.time() - start_time)} seconds"
-    )
+    print(f"Crawled {nb_crawled_news} articles in total")
     browser.close()
 
 CONNECTION.close()
