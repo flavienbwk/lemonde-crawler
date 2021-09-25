@@ -4,9 +4,9 @@
 <img src="https://travis-ci.com/flavienbwk/lemonde-crawler.svg?branch=master"/>
 </p>
 
-_Le Monde_ (english: _The World_) is the most famous newspaper in France. It offers thousands of articles through its online website.
+_Le Monde_ is the most famous newspaper in France. It offers thousands of articles through its online website.
 
-Are you a team member of Le Monde ? If you need web security consulting to avoid scraping, contact me : [berwick.fr](https://berwick.fr) !
+Are you a team member of _Le Monde_ ? If you need web security consulting to avoid scraping, contact me : [berwick.fr](https://berwick.fr) !
 
 <hr/>
 
