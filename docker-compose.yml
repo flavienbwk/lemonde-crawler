@@ -1,0 +1,16 @@
+version: '3'
+
+services: 
+
+  crawler:
+    build: .
+    command: python3 /usr/app/crawler.py
+    volumes:
+      - "./scripts:/usr/app:ro"
+      - "./database:/usr/database:rw"
+    environment: 
+      CRAWLER_EMAIL: ${CRAWLER_EMAIL}
+      CRAWLER_PASSWORD: ${CRAWLER_EMAIL}
+      RETRIEVE_RELATED_ARTICLE_LINKS: "false"
+      RETRIEVE_EACH_ARTICLE_LINKS: "false"
+      IS_DOCKER: "true"
