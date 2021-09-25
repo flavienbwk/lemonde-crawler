@@ -8,11 +8,12 @@ import sqlite3
 import time
 import traceback
 from typing import List, Union
+from urllib.parse import urljoin, urlparse
 
-import tqdm
 import lxml.html
 import lxml.html.clean
 import playwright
+import tqdm
 from playwright.sync_api import ElementHandle, Page, sync_playwright
 
 FILE_PATH = os.path.realpath(__file__)
@@ -155,7 +156,9 @@ def get_article_links_from_element(element: Union[Page, ElementHandle]) -> List[
     article_hrefs = []
     for href in hrefs_of_page:
         if re.match("https:\/\/www\.lemonde\.fr\/.*\/article\/.*", href):
-            article_hrefs.append(href)
+            href = urljoin(href, urlparse(href).path)
+            if href not in article_hrefs:
+                article_hrefs.append(href)
     return article_hrefs
 
 
@@ -231,7 +234,7 @@ with sync_playwright() as p:
         while article_hrefs:
             pbar.update(1)
             article_href = article_hrefs.pop()
-            
+
             if was_article_crawled(article_href):
                 print(f"Article already in database : {article_href}")
                 pbar.update(0)
@@ -296,10 +299,8 @@ with sync_playwright() as p:
                             ):
                                 article_hrefs.append(new_article_link)
                                 nb_total_articles += 1
-                        pbar.total = nb_total_articles
-                        pbar.refresh()
                 except AttributeError as e:
-                    print("Could not retrieve more links for this article")
+                    print("Could not retrieve more links for this article", flush=True)
 
                 if RETRIEVE_EACH_ARTICLE_LINKS:
                     new_article_links = get_article_links_from_element(page)
@@ -311,12 +312,13 @@ with sync_playwright() as p:
                         ):
                             article_hrefs.append(new_article_link)
                             nb_total_articles += 1
-                    pbar.total = nb_total_articles
-                    pbar.refresh()
             except Exception as e:
                 not_working_articles.append(article_href)
                 print(traceback.format_exc())
                 print(e)
+
+            pbar.total = nb_total_articles
+            pbar.refresh()
 
     print(f"Crawled {nb_crawled_news} articles in total")
     browser.close()
