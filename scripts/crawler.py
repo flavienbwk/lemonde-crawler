@@ -34,8 +34,8 @@ RETRIEVE_EACH_ARTICLE_LINKS = (
 PAGE_HEIGHT = 976
 PAGE_WIDTH = 960
 
-CRAWLER_EMAIL = os.getenv("CRAWLER_EMAIL")
-CRAWLER_PASSWORD = os.getenv("CRAWLER_PASSWORD")
+LEMONDE_EMAIL = os.getenv("LEMONDE_EMAIL")
+LEMONDE_PASSWORD = os.getenv("LEMONDE_PASSWORD")
 
 print(f"Initializing SQL Lite connection for {SQLITE_DATABASE}...")
 CONNECTION = sqlite3.connect(SQLITE_DATABASE)
@@ -208,9 +208,9 @@ with sync_playwright() as p:
 
         # Login
         page.wait_for_selector("#email")
-        page.type("#email", CRAWLER_EMAIL, delay=random.randint(30, 120))
+        page.type("#email", LEMONDE_EMAIL, delay=random.randint(30, 120))
         page.wait_for_selector("#password")
-        page.type("#password", CRAWLER_PASSWORD, delay=random.randint(30, 120))
+        page.type("#password", LEMONDE_PASSWORD, delay=random.randint(30, 120))
         page.wait_for_selector("#login > main > form > div > .button")
         page.click("#login > main > form > div > .button")
         print("Logged in !")

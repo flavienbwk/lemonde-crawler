@@ -10,8 +10,8 @@ services:
       - "./database:/usr/database:rw"
     environment:
       START_LINK: "https://www.lemonde.fr"
-      CRAWLER_EMAIL: ${CRAWLER_EMAIL}
-      CRAWLER_PASSWORD: ${CRAWLER_EMAIL}
+      LEMONDE_EMAIL: ${LEMONDE_EMAIL}
+      LEMONDE_PASSWORD: ${LEMONDE_PASSWORD}
       RETRIEVE_RELATED_ARTICLE_LINKS: "false"
       RETRIEVE_EACH_ARTICLE_LINKS: "false"
       IS_DOCKER: "true"

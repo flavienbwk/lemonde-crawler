@@ -33,8 +33,8 @@ This project uses [Playwright](https://github.com/microsoft/playwright).
 
 | Name                           | Type | Description                                                                 |
 | ------------------------------ | ---- | --------------------------------------------------------------------------- |
-| CRAWLER_EMAIL                  | str  | Your _Le Monde_ email address                                               |
-| CRAWLER_PASSWORD               | str  | Your _Le Monde_ password                                                    |
+| LEMONDE_EMAIL                  | str  | Your _Le Monde_ email address                                               |
+| LEMONDE_PASSWORD               | str  | Your _Le Monde_ password                                                    |
 | START_LINK                     | str  | After login, start scraping articles from this page                         |
 | RETRIEVE_RELATED_ARTICLE_LINKS | bool | Crawl links in currently scraped article pointing to other similar articles |
 | RETRIEVE_EACH_ARTICLE_LINKS    | bool | Crawl all article links present in the currently scraped article            |
@@ -47,7 +47,7 @@ This project uses [Playwright](https://github.com/microsoft/playwright).
     cp .env.example .env
     ```
 
-    Edit `CRAWLER_EMAIL` and `CRAWLER_PASSWORD` matching your Le Monde's credentials (we recommend a premium account to avoid any limit)
+    Edit `LEMONDE_EMAIL` and `LEMONDE_PASSWORD` matching your Le Monde's credentials (we recommend a premium account to avoid any limit)
 
 2. Running the container
 
@@ -68,7 +68,7 @@ You must have `Python>=3.7` and `pip` installed.
 2. Run CLI
 
     ```bash
-    CRAWLER_EMAIL='...' CRAWLER_PASSWORD='...' python3 ./scripts/crawler.py
+    LEMONDE_EMAIL='...' LEMONDE_PASSWORD='...' python3 ./scripts/crawler.py
     ```
 
 ## Ideas
