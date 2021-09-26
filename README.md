@@ -33,11 +33,12 @@ This project uses [Playwright](https://github.com/microsoft/playwright).
 
 | Name                           | Type | Description                                                                 |
 | ------------------------------ | ---- | --------------------------------------------------------------------------- |
-| CRAWLER_EMAIL                  | str  | Your LeMonde email address                                                  |
-| CRAWLER_PASSWORD               | str  | Your LeMonde email password                                                 |
+| CRAWLER_EMAIL                  | str  | Your _Le Monde_ email address                                               |
+| CRAWLER_PASSWORD               | str  | Your _Le Monde_ password                                                    |
 | START_LINK                     | str  | After login, start scraping articles from this page                         |
 | RETRIEVE_RELATED_ARTICLE_LINKS | bool | Crawl links in currently scraped article pointing to other similar articles |
 | RETRIEVE_EACH_ARTICLE_LINKS    | bool | Crawl all article links present in the currently scraped article            |
+
 ## Usage (Docker)
 
 1. Copy and fill your credentials in `.env` :
