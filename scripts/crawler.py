@@ -189,7 +189,6 @@ with sync_playwright() as p:
                 "div.Connexion__account > a > span.AccountMenu > span.AccountMenu__type > span"
             )
             is_login_needed = True if badge_subscribed == None else False
-            print("Good, we're connected back.")
         except playwright._impl._api_types.TimeoutError as e:
             print(traceback.format_exc())
             print("Need to login again !")
@@ -222,6 +221,8 @@ with sync_playwright() as p:
         with open(COOKIES_FILE, "wb+") as cookies_fs:
             cookies_fs.write(pickle.dumps(cookies))
         page.goto(os.environ.get("START_LINK", "https://www.lemonde.fr/"))
+    else:
+        print("Good, we're connected back.")
 
     page.wait_for_load_state()
     article_hrefs = get_article_links_from_element(page)
@@ -240,12 +241,12 @@ with sync_playwright() as p:
                 pbar.update(0)
                 continue
 
-            page.goto(article_href)
-            random_activity(page, PAGE_HEIGHT, PAGE_WIDTH)
-            time.sleep(4)
-            random_activity(page, PAGE_HEIGHT, PAGE_WIDTH)
-
             try:
+                page.goto(article_href)
+                random_activity(page, PAGE_HEIGHT, PAGE_WIDTH)
+                time.sleep(1)
+                random_activity(page, PAGE_HEIGHT, PAGE_WIDTH)
+
                 article_content_html = ""
                 article_contents = page.query_selector_all(".article__paragraph")
                 for article_content in article_contents:
