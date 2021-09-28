@@ -1,12 +1,8 @@
 # :spider: Le Monde crawler
 
-<p align="center">
-<img src="https://travis-ci.com/flavienbwk/lemonde-crawler.svg?branch=master"/>
-</p>
+**:warning: THIS PROJECT ISN'T MAINTAINED ANYMORE, PLEASE VISIT [News Crawler](https://github.com/flavienbwk/news-crawler), THE SUCCESSOR OF THIS PROJECT.**
 
 _Le Monde_ is the most famous newspaper in France. It offers thousands of articles through its online website.
-
-Are you a team member of _Le Monde_ ? If you need web security consulting to avoid scraping, contact me : [berwick.fr](https://berwick.fr) !
 
 <hr/>
 
